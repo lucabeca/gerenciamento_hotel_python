@@ -1,5 +1,10 @@
+import os
 from py2neo import Graph
 from config import Config
+from neomodel import config as neomodel_config
+
+# Configurando o Neomodel com as mesmas credenciais
+neomodel_config.DATABASE_URL = f"bolt://{Config.NEO4J_USERNAME}:{Config.NEO4J_PASSWORD}@{Config.NEO4J_URI.split('://')[1]}"
 
 class Database:
     def __init__(self):
@@ -8,5 +13,4 @@ class Database:
     def get_graph(self):
         return self.graph
 
-# Instancia única do banco de dados
 db = Database().get_graph()
