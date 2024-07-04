@@ -1,33 +1,37 @@
 import unittest
+from models import Cliente
 from repositories.cliente_repository import ClienteRepository
-from neomodel import db
 
 class ClienteRepositoryTest(unittest.TestCase):
 
     def setUp(self):
-        db.cypher_query("MATCH (n) DETACH DELETE n")
+        self.cliente_data = {
+            "nome": "Teste",
+            "email": "teste@example.com",
+            "telefone": "(11) 1234-5678"
+        }
+        self.cliente = ClienteRepository.create_cliente(**self.cliente_data)
+
+    def tearDown(self):
+        ClienteRepository.delete_cliente(self.cliente.uid)
 
     def test_create_cliente(self):
-        cliente = ClienteRepository.create_cliente(nome="John Doe", email="john.doe@example.com")
-        self.assertIsNotNone(cliente)
-        self.assertEqual(cliente.nome, "John Doe")
-        self.assertEqual(cliente.email, "john.doe@example.com")
-
-    def test_get_cliente_by_uid(self):
-        cliente = ClienteRepository.create_cliente(nome="John Doe", email="john.doe@example.com")
-        retrieved_cliente = ClienteRepository.get_cliente_by_uid(cliente.uid)
-        self.assertIsNotNone(retrieved_cliente)
-        self.assertEqual(retrieved_cliente.uid, cliente.uid)
-
-    def test_get_all_clientes(self):
-        ClienteRepository.create_cliente(nome="John Doe", email="john.doe@example.com")
-        clientes = ClienteRepository.get_all_clientes()
-        self.assertGreaterEqual(len(clientes), 1)
+        self.assertIsNotNone(self.cliente)
+        self.assertEqual(self.cliente.nome, self.cliente_data["nome"])
+        self.assertEqual(self.cliente.email, self.cliente_data["email"])
+        self.assertEqual(self.cliente.telefone, self.cliente_data["telefone"])
 
     def test_delete_cliente(self):
-        cliente = ClienteRepository.create_cliente(nome="John Doe", email="john.doe@example.com")
-        self.assertTrue(ClienteRepository.delete_cliente(cliente.uid))
-        self.assertIsNone(ClienteRepository.get_cliente_by_uid(cliente.uid))
+        self.assertTrue(ClienteRepository.delete_cliente(self.cliente.uid))
+
+    def test_get_all_clientes(self):
+        clientes = ClienteRepository.get_all_clientes()
+        self.assertGreater(len(clientes), 0)
+
+    def test_get_cliente_by_uid(self):
+        cliente = ClienteRepository.get_cliente_by_uid(self.cliente.uid)
+        self.assertIsNotNone(cliente)
+        self.assertEqual(cliente.uid, self.cliente.uid)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,28 +1,25 @@
 from flask import Blueprint, request, jsonify
-from services.quarto_service import QuartoService
+from repositories.quarto_repository import QuartoRepository
 
-quarto_blueprint = Blueprint('quarto_blueprint', __name__)
+quarto_controller = Blueprint('quarto_controller', __name__)
 
-@quarto_blueprint.route('/', methods=['POST'])
+@quarto_controller.route('/quartos/create', methods=['POST'])
 def create_quarto():
     data = request.get_json()
-    quarto = QuartoService.create_quarto(data['numero'], data['tipo'], data['capacidade'], data['hotel'])
-    return jsonify(quarto.__dict__), 201
+    quarto = QuartoRepository.create_quarto(**data)
+    return jsonify(quarto), 201
 
-@quarto_blueprint.route('/<uid>', methods=['GET'])
+@quarto_controller.route('/quartos/<uid>', methods=['GET'])
 def get_quarto(uid):
-    quarto = QuartoService.get_quarto_by_uid(uid)
-    if quarto:
-        return jsonify(quarto.__dict__), 200
-    return jsonify({'message': 'Quarto não encontrado'}), 404
+    quarto = QuartoRepository.get_quarto_by_uid(uid)
+    return jsonify(quarto), 200
 
-@quarto_blueprint.route('/', methods=['GET'])
+@quarto_controller.route('/quartos/all', methods=['GET'])
 def get_all_quartos():
-    quartos = QuartoService.get_all_quartos()
-    return jsonify([quarto.__dict__ for quarto in quartos]), 200
+    quartos = QuartoRepository.get_all_quartos()
+    return jsonify(quartos), 200
 
-@quarto_blueprint.route('/<uid>', methods=['DELETE'])
+@quarto_controller.route('/quartos/delete/<uid>', methods=['DELETE'])
 def delete_quarto(uid):
-    if QuartoService.delete_quarto(uid):
-        return jsonify({'message': 'Quarto deletado com sucesso'}), 200
-    return jsonify({'message': 'Quarto não encontrado'}), 404
+    QuartoRepository.delete_quarto(uid)
+    return '', 200

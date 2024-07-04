@@ -1,16 +1,21 @@
-from neomodel import StructuredNode, StringProperty, UniqueIdProperty
-
-class Cliente(StructuredNode):
-    uid = UniqueIdProperty()
-    nome = StringProperty(required=True)
-    email = StringProperty()
+from neomodel import db
+from models import Cliente
 
 class ClienteRepository:
 
     @staticmethod
-    def create_cliente(nome, email):
-        cliente = Cliente(nome=nome, email=email)
+    def create_cliente(nome, email, telefone):
+        cliente = Cliente(nome=nome, email=email, telefone=telefone)
         cliente.save()
+        return cliente
+
+    @staticmethod
+    def delete_cliente(uid):
+        cliente = Cliente.nodes.get_or_none(uid=uid)
+        if cliente:
+            cliente.delete()
+            return True
+        return False
 
     @staticmethod
     def get_all_clientes():
@@ -18,15 +23,4 @@ class ClienteRepository:
 
     @staticmethod
     def get_cliente_by_uid(uid):
-        try:
-            return Cliente.nodes.get(uid=uid)
-        except Cliente.DoesNotExist:
-            return None
-
-    @staticmethod
-    def delete_cliente(uid):
-        cliente = ClienteRepository.get_cliente_by_uid(uid)
-        if cliente:
-            cliente.delete()
-            return True
-        return False
+        return Cliente.nodes.get_or_none(uid=uid)

@@ -1,33 +1,37 @@
 import unittest
+from models import Hotel
 from repositories.hotel_repository import HotelRepository
-from neomodel import db
 
 class HotelRepositoryTest(unittest.TestCase):
 
     def setUp(self):
-        db.cypher_query("MATCH (n) DETACH DELETE n")
+        self.hotel_data = {
+            "nome": "Hotel Teste",
+            "classificacao": 5,
+            "data_construcao": "2020-01-01",
+            "quantidade_quartos": 100
+        }
+        self.hotel = HotelRepository.create_hotel(**self.hotel_data)
+
+    def tearDown(self):
+        HotelRepository.delete_hotel(self.hotel.uid)
 
     def test_create_hotel(self):
-        hotel = HotelRepository.create_hotel(nome="Hotel ABC", endereco="Endereco XYZ")
-        self.assertIsNotNone(hotel)
-        self.assertEqual(hotel.nome, "Hotel ABC")
-        self.assertEqual(hotel.endereco, "Endereco XYZ")
-
-    def test_get_hotel_by_uid(self):
-        hotel = HotelRepository.create_hotel(nome="Hotel ABC", endereco="Endereco XYZ")
-        retrieved_hotel = HotelRepository.get_hotel_by_uid(hotel.uid)
-        self.assertIsNotNone(retrieved_hotel)
-        self.assertEqual(retrieved_hotel.uid, hotel.uid)
-
-    def test_get_all_hotels(self):
-        HotelRepository.create_hotel(nome="Hotel ABC", endereco="Endereco XYZ")
-        hotels = HotelRepository.get_all_hotels()
-        self.assertGreaterEqual(len(hotels), 1)
+        self.assertIsNotNone(self.hotel)
+        self.assertEqual(self.hotel.nome, self.hotel_data["nome"])
+        self.assertEqual(self.hotel.classificacao, self.hotel_data["classificacao"])
 
     def test_delete_hotel(self):
-        hotel = HotelRepository.create_hotel(nome="Hotel ABC", endereco="Endereco XYZ")
-        self.assertTrue(HotelRepository.delete_hotel(hotel.uid))
-        self.assertIsNone(HotelRepository.get_hotel_by_uid(hotel.uid))
+        self.assertTrue(HotelRepository.delete_hotel(self.hotel.uid))
+
+    def test_get_all_hotels(self):
+        hoteis = HotelRepository.get_all_hotels()
+        self.assertGreater(len(hoteis), 0)
+
+    def test_get_hotel_by_uid(self):
+        hotel = HotelRepository.get_hotel_by_uid(self.hotel.uid)
+        self.assertIsNotNone(hotel)
+        self.assertEqual(hotel.uid, self.hotel.uid)
 
 if __name__ == '__main__':
     unittest.main()

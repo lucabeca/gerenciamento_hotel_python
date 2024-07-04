@@ -1,28 +1,26 @@
-from models.quarto import Quarto
+from neomodel import db
+from models import Quarto
 
 class QuartoRepository:
 
     @staticmethod
-    def create_quarto(numero, tipo, capacidade, hotel):
-        quarto = Quarto(numero=numero, tipo=tipo, capacidade=capacidade, hotel=hotel).save()
+    def create_quarto(numero, disponibilidade, preco):
+        quarto = Quarto(numero=numero, disponibilidade=disponibilidade, preco=preco)
+        quarto.save()
         return quarto
 
     @staticmethod
-    def get_quarto_by_uid(uid):
-        try:
-            quarto = Quarto.nodes.get(uid=uid)
-            return quarto
-        except Quarto.DoesNotExist:
-            return None
+    def delete_quarto(uid):
+        quarto = Quarto.nodes.get_or_none(uid=uid)
+        if quarto:
+            quarto.delete()
+            return True
+        return False
 
     @staticmethod
     def get_all_quartos():
         return Quarto.nodes.all()
 
     @staticmethod
-    def delete_quarto(uid):
-        quarto = QuartoRepository.get_quarto_by_uid(uid)
-        if quarto:
-            quarto.delete()
-            return True
-        return False
+    def get_quarto_by_uid(uid):
+        return Quarto.nodes.get_or_none(uid=uid)

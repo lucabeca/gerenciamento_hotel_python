@@ -1,28 +1,26 @@
-from models.endereco import Endereco
+from neomodel import db
+from models import Endereco
 
 class EnderecoRepository:
 
     @staticmethod
-    def create_endereco(rua, cidade, estado, cep):
-        endereco = Endereco(rua=rua, cidade=cidade, estado=estado, cep=cep).save()
+    def create_endereco(rua, numero, bairro, cidade, estado, pais, cep):
+        endereco = Endereco(rua=rua, numero=numero, bairro=bairro, cidade=cidade, estado=estado, pais=pais, cep=cep)
+        endereco.save()
         return endereco
 
     @staticmethod
-    def get_endereco_by_uid(uid):
-        try:
-            endereco = Endereco.nodes.get(uid=uid)
-            return endereco
-        except Endereco.DoesNotExist:
-            return None
+    def delete_endereco(uid):
+        endereco = Endereco.nodes.get_or_none(uid=uid)
+        if endereco:
+            endereco.delete()
+            return True
+        return False
 
     @staticmethod
     def get_all_enderecos():
         return Endereco.nodes.all()
 
     @staticmethod
-    def delete_endereco(uid):
-        endereco = EnderecoRepository.get_endereco_by_uid(uid)
-        if endereco:
-            endereco.delete()
-            return True
-        return False
+    def get_endereco_by_uid(uid):
+        return Endereco.nodes.get_or_none(uid=uid)

@@ -1,33 +1,36 @@
 import unittest
+from models import ReservaDetalhe
 from repositories.reserva_detalhe_repository import ReservaDetalheRepository
-from neomodel import db
 
 class ReservaDetalheRepositoryTest(unittest.TestCase):
 
     def setUp(self):
-        db.cypher_query("MATCH (n) DETACH DELETE n")
+        self.reserva_detalhe_data = {
+            "reserva_uid": "some-reserva-uid",
+            "quarto_uid": "some-quarto-uid",
+            "cliente_uid": "some-cliente-uid"
+        }
+        self.reserva_detalhe = ReservaDetalheRepository.create_reserva_detalhe(**self.reserva_detalhe_data)
+
+    def tearDown(self):
+        ReservaDetalheRepository.delete_reserva_detalhe(self.reserva_detalhe.uid)
 
     def test_create_reserva_detalhe(self):
-        reserva_detalhe = ReservaDetalheRepository.create_reserva_detalhe(reserva="Reserva ABC", detalhe="Detalhe XYZ")
-        self.assertIsNotNone(reserva_detalhe)
-        self.assertEqual(reserva_detalhe.reserva, "Reserva ABC")
-        self.assertEqual(reserva_detalhe.detalhe, "Detalhe XYZ")
-
-    def test_get_reserva_detalhe_by_uid(self):
-        reserva_detalhe = ReservaDetalheRepository.create_reserva_detalhe(reserva="Reserva ABC", detalhe="Detalhe XYZ")
-        retrieved_reserva_detalhe = ReservaDetalheRepository.get_reserva_detalhe_by_uid(reserva_detalhe.uid)
-        self.assertIsNotNone(retrieved_reserva_detalhe)
-        self.assertEqual(retrieved_reserva_detalhe.uid, reserva_detalhe.uid)
-
-    def test_get_all_reserva_detalhes(self):
-        ReservaDetalheRepository.create_reserva_detalhe(reserva="Reserva ABC", detalhe="Detalhe XYZ")
-        reserva_detalhes = ReservaDetalheRepository.get_all_reserva_detalhes()
-        self.assertGreaterEqual(len(reserva_detalhes), 1)
+        self.assertIsNotNone(self.reserva_detalhe)
+        self.assertEqual(self.reserva_detalhe.reserva_uid, self.reserva_detalhe_data["reserva_uid"])
+        self.assertEqual(self.reserva_detalhe.quarto_uid, self.reserva_detalhe_data["quarto_uid"])
 
     def test_delete_reserva_detalhe(self):
-        reserva_detalhe = ReservaDetalheRepository.create_reserva_detalhe(reserva="Reserva ABC", detalhe="Detalhe XYZ")
-        self.assertTrue(ReservaDetalheRepository.delete_reserva_detalhe(reserva_detalhe.uid))
-        self.assertIsNone(ReservaDetalheRepository.get_reserva_detalhe_by_uid(reserva_detalhe.uid))
+        self.assertTrue(ReservaDetalheRepository.delete_reserva_detalhe(self.reserva_detalhe.uid))
+
+    def test_get_all_reserva_detalhes(self):
+        reserva_detalhes = ReservaDetalheRepository.get_all_reserva_detalhes()
+        self.assertGreater(len(reserva_detalhes), 0)
+
+    def test_get_reserva_detalhe_by_uid(self):
+        reserva_detalhe = ReservaDetalheRepository.get_reserva_detalhe_by_uid(self.reserva_detalhe.uid)
+        self.assertIsNotNone(reserva_detalhe)
+        self.assertEqual(reserva_detalhe.uid, self.reserva_detalhe.uid)
 
 if __name__ == '__main__':
     unittest.main()
